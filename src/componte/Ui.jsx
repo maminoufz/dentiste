@@ -1,6 +1,6 @@
 // src/components/UI.jsx
 import  { useEffect, useRef } from "react";
-import { getAvatarColors, getInitials, TYPE_COLORS, STATUT_STYLES } from "../utils";
+import { getAvatarColors, getInitials, TYPE_COLORS, STATUT_STYLES } from "../Utils";
 
 // ── Avatar ──────────────────────────────────────────────────────────────────
 export function Avatar({ prenom = "", nom = "", size = 40, style = {} }) {

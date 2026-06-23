@@ -5,7 +5,10 @@ import { formatDA, formatDate, currentMonth } from "../Utils";
 
 export default function Dashboard({ patients, seances, onSelectPatient }) {
   const thisMonth  = currentMonth();
-  const getVersement = (s) => s.versement !== undefined && s.versement !== "" ? Number(s.versement) : (s.statut === "payé" ? Number(s.prix || 0) : 0);
+  const getVersement = (s) => {
+    if (s.versements && s.versements.length > 0) return s.versements.reduce((acc, v) => acc + Number(v.montant || 0), 0);
+    return s.versement !== undefined && s.versement !== "" ? Number(s.versement) : (s.statut === "payé" ? Number(s.prix || 0) : 0);
+  };
   const getImpaye = (s) => Math.max(0, Number(s.prix || 0) - getVersement(s));
 
   const totalPaye  = seances.reduce((n, s) => n + getVersement(s), 0);

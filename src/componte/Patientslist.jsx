@@ -8,7 +8,10 @@ import { addPatient, updatePatient, deletePatient } from "../firebase/config";
 function PatientCard({ patient, seances, onClick, onEdit, onDelete }) {
   const ps   = seances.filter((s) => s.patientId === patient.id);
   const last  = ps.sort((a, b) => (b.date || "").localeCompare(a.date || ""))[0];
-  const getVersement = (s) => s.versement !== undefined && s.versement !== "" ? Number(s.versement) : (s.statut === "payé" ? Number(s.prix || 0) : 0);
+  const getVersement = (s) => {
+    if (s.versements && s.versements.length > 0) return s.versements.reduce((acc, v) => acc + Number(v.montant || 0), 0);
+    return s.versement !== undefined && s.versement !== "" ? Number(s.versement) : (s.statut === "payé" ? Number(s.prix || 0) : 0);
+  };
   const getImpaye = (s) => Math.max(0, Number(s.prix || 0) - getVersement(s));
   const impaye = ps.reduce((n, s) => n + getImpaye(s), 0);
   const age   = calcAge(patient.dateNaissance);
