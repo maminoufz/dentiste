@@ -17,7 +17,6 @@ export default function PatientForm({ initial, onSave, onCancel, loading }) {
     const e = {};
     if (!f.nom.trim())       e.nom       = "Obligatoire";
     if (!f.prenom.trim())    e.prenom    = "Obligatoire";
-    if (!f.telephone.trim()) e.telephone = "Obligatoire";
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -47,7 +46,7 @@ export default function PatientForm({ initial, onSave, onCancel, loading }) {
         <FormRow label="Nom"    required>{field("nom",    "Nom")}</FormRow>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        <FormRow label="Téléphone" required>{field("telephone", "0555 12 34 56")}</FormRow>
+        <FormRow label="Téléphone">{field("telephone", "0555 12 34 56")}</FormRow>
         <FormRow label="Date de naissance">
           <input type="date" value={f.dateNaissance} onChange={(e) => set("dateNaissance", e.target.value)} />
         </FormRow>

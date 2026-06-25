@@ -135,9 +135,21 @@ export default function PatientDetail({ patient, seances, onBack, onEditPatient,
                       <StatutBadge statut={s.statut} />
                     </div>
                     <div style={{ fontSize: 12, color: "var(--slate-400)", marginBottom: s.notes ? 6 : 0 }}>
-                      {formatDate(s.date)}{s.heure ? ` à ${s.heure}` : ""}
+                      {formatDate(s.date)}
                     </div>
                     {s.notes && <div style={{ fontSize: 13, color: "var(--slate-600)", lineHeight: 1.55 }}>{s.notes}</div>}
+                    {s.versements && s.versements.length > 0 && (
+                      <div style={{ marginTop: 8, fontSize: 12, color: "var(--slate-500)", background: "var(--slate-50)", padding: "6px 10px", borderRadius: "var(--radius-sm)" }}>
+                        <div style={{ fontWeight: 600, marginBottom: 4 }}>Versements :</div>
+                        {s.versements.map((v, i) => (
+                          <div key={i} style={{ display: "flex", gap: 8, marginBottom: 2 }}>
+                            <span>{formatDate(v.date)}</span>
+                            <span style={{ fontWeight: 600, color: "var(--teal-600)" }}>{formatDA(v.montant || 0)}</span>
+                            {v.note && <span style={{ fontStyle: "italic", color: "var(--slate-400)" }}>- {v.note}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                     {s.prix && <span style={{ fontSize: 16, fontWeight: 700, fontFamily: "var(--font-display)", whiteSpace: "nowrap" }}>{formatDA(s.prix)}</span>}

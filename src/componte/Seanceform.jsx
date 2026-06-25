@@ -3,14 +3,14 @@ import  { useState } from "react";
 import { FormRow, Btn } from "./Ui";
 import { TYPES_SEANCE, todayISO } from "../Utils";
 
-const EMPTY = { date: todayISO(), heure: "09:00", type: "Consultation", dent: "", notes: "", prix: "", versements: [], statut: "impayé" };
+const EMPTY = { date: todayISO(), type: "Consultation", dent: "", notes: "", prix: "", versements: [], statut: "impayé" };
 
 export default function SeanceForm({ patientId, initial, onSave, onCancel, loading }) {
   const [f, setF] = useState(() => {
     const base = initial ? { ...EMPTY, ...initial } : { ...EMPTY, patientId };
     if (!base.versements) base.versements = [];
     if (base.versement && base.versements.length === 0) {
-      base.versements = [{ date: base.date || todayISO(), montant: base.versement }];
+      base.versements = [{ date: base.date || todayISO(), montant: base.versement, note: "" }];
     }
     return base;
   });
@@ -46,14 +46,11 @@ export default function SeanceForm({ patientId, initial, onSave, onCancel, loadi
 
   return (
     <form onSubmit={submit} noValidate>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
         <FormRow label="Date" required>
           <input type="date" value={f.date} onChange={(e) => set("date", e.target.value)}
             style={{ borderColor: errors.date ? "var(--red-400)" : "" }} />
           {errors.date && <div style={{ fontSize: 11, color: "var(--red-500)", marginTop: 3 }}>{errors.date}</div>}
-        </FormRow>
-        <FormRow label="Heure">
-          <input type="time" value={f.heure} onChange={(e) => set("heure", e.target.value)} />
         </FormRow>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 16 }}>
@@ -79,7 +76,7 @@ export default function SeanceForm({ patientId, initial, onSave, onCancel, loadi
       <div style={{ marginTop: 16, padding: 12, background: "var(--slate-50)", borderRadius: "var(--radius-md)", border: "1px solid var(--slate-100)" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
           <h4 style={{ fontSize: 13, fontWeight: 600, color: "var(--slate-700)", margin: 0 }}>Versements (DA)</h4>
-          <button type="button" onClick={() => setF((p) => ({ ...p, versements: [...p.versements, { date: todayISO(), montant: "" }] }))}
+          <button type="button" onClick={() => setF((p) => ({ ...p, versements: [...p.versements, { date: todayISO(), montant: "", note: "" }] }))}
             style={{ fontSize: 11, background: "white", border: "1px solid var(--slate-200)", padding: "2px 8px", borderRadius: "var(--radius-sm)", cursor: "pointer" }}>
             + Ajouter
           </button>
@@ -99,6 +96,11 @@ export default function SeanceForm({ patientId, initial, onSave, onCancel, loadi
               nv[i].montant = e.target.value;
               set("versements", nv);
             }} style={{ flex: 1 }} />
+            <input type="text" value={v.note || ""} placeholder="Note" onChange={(e) => {
+              const nv = [...f.versements];
+              nv[i].note = e.target.value;
+              set("versements", nv);
+            }} style={{ flex: 2 }} />
             <button type="button" onClick={() => {
               const nv = [...f.versements];
               nv.splice(i, 1);
