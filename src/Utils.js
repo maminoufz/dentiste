@@ -67,8 +67,10 @@ export function formatDA(n) {
 export function formatDate(d) {
   if (!d) return "—";
   try {
+    if (String(d).length === 4 && !isNaN(Number(d))) return String(d);
     // Handle Firestore Timestamp objects
-    const date = d?.toDate ? d.toDate() : new Date(d + "T00:00:00");
+    const dateStr = typeof d === "string" && !d.includes("T") ? d + "T00:00:00" : d;
+    const date = d?.toDate ? d.toDate() : new Date(dateStr);
     return date.toLocaleDateString("fr-DZ", {
       day: "2-digit",
       month: "short",
@@ -81,6 +83,9 @@ export function formatDate(d) {
 
 export function calcAge(dob) {
   if (!dob) return null;
+  if (String(dob).length === 4 && !isNaN(Number(dob))) {
+    return new Date().getFullYear() - parseInt(dob, 10);
+  }
   const ms = Date.now() - new Date(dob).getTime();
   return Math.floor(ms / (1000 * 60 * 60 * 24 * 365.25));
 }

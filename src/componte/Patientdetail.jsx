@@ -88,7 +88,7 @@ export default function PatientDetail({ patient, seances, onBack, onEditPatient,
             <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
               <InfoChip label="Téléphone"   value={patient.telephone} />
               {age && <InfoChip label="Âge" value={`${age} ans`} />}
-              {patient.dateNaissance && <InfoChip label="Né(e) le" value={formatDate(patient.dateNaissance)} />}
+              {patient.dateNaissance && <InfoChip label={String(patient.dateNaissance).length === 4 ? "Né(e) en" : "Né(e) le"} value={formatDate(patient.dateNaissance)} />}
               {patient.allergies && <InfoChip label="Allergies" value={patient.allergies} accent="var(--red-600)" />}
             </div>
             {patient.notes && (

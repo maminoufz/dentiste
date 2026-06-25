@@ -47,8 +47,15 @@ export default function PatientForm({ initial, onSave, onCancel, loading }) {
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <FormRow label="Téléphone">{field("telephone", "0555 12 34 56")}</FormRow>
-        <FormRow label="Date de naissance">
-          <input type="date" value={f.dateNaissance} onChange={(e) => set("dateNaissance", e.target.value)} />
+        <FormRow label="Année de naissance">
+          <input 
+            type="number" 
+            min="1900" 
+            max={new Date().getFullYear()} 
+            placeholder="Ex: 1980" 
+            value={f.dateNaissance ? String(f.dateNaissance).substring(0, 4) : ""} 
+            onChange={(e) => set("dateNaissance", e.target.value)} 
+          />
         </FormRow>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
