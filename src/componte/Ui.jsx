@@ -123,7 +123,7 @@ export function StatCard({ label, value, sub, icon, accent = "teal" }) {
 }
 
 // ── Modal ─────────────────────────────────────────────────────────────────────
-export function Modal({ title, onClose, children, width = 560 }) {
+export function Modal({ title, onClose, children, width = 560, fullScreen = false }) {
   const overlayRef = useRef(null);
   useEffect(() => {
     const onKey = (e) => { if (e.key === "Escape") onClose(); };
@@ -135,14 +135,14 @@ export function Modal({ title, onClose, children, width = 560 }) {
     <div
       ref={overlayRef}
       onClick={(e) => e.target === overlayRef.current && onClose()}
-      style={{ position: "fixed", inset: 0, background: "rgba(15,23,42,0.45)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}
+      style={{ position: "fixed", inset: 0, background: fullScreen ? "var(--slate-50)" : "rgba(15,23,42,0.45)", zIndex: 200, display: "flex", alignItems: "center", justifyContent: "center", padding: fullScreen ? 0 : 16 }}
     >
-      <div className="scale-in" style={{ background: "white", borderRadius: "var(--radius-xl)", width: "100%", maxWidth: width, maxHeight: "92vh", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "var(--shadow-lg)" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px", borderBottom: "1px solid var(--slate-100)" }}>
-          <h3 style={{ fontSize: 16, fontWeight: 600 }}>{title}</h3>
-          <button onClick={onClose} style={{ width: 32, height: 32, borderRadius: "var(--radius-md)", background: "var(--slate-100)", color: "var(--slate-500)", display: "flex", alignItems: "center", justifyContent: "center", border: "none", fontSize: 18, cursor: "pointer" }}>×</button>
+      <div className={fullScreen ? "fade-in" : "scale-in"} style={{ background: "white", borderRadius: fullScreen ? 0 : "var(--radius-xl)", width: "100%", height: fullScreen ? "100%" : "auto", maxWidth: fullScreen ? "100%" : width, maxHeight: fullScreen ? "100%" : "92vh", overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: fullScreen ? "none" : "var(--shadow-lg)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: fullScreen ? "24px 40px" : "20px 24px", borderBottom: "1px solid var(--slate-100)", background: "white" }}>
+          <h3 style={{ fontSize: fullScreen ? 24 : 16, fontWeight: 700 }}>{title}</h3>
+          <button onClick={onClose} style={{ width: fullScreen ? 40 : 32, height: fullScreen ? 40 : 32, borderRadius: fullScreen ? "50%" : "var(--radius-md)", background: "var(--slate-100)", color: "var(--slate-500)", display: "flex", alignItems: "center", justifyContent: "center", border: "none", fontSize: fullScreen ? 20 : 18, cursor: "pointer", transition: "all 0.2s" }} onMouseEnter={(e) => e.currentTarget.style.background = "var(--slate-200)"} onMouseLeave={(e) => e.currentTarget.style.background = "var(--slate-100)"}>×</button>
         </div>
-        <div style={{ padding: "20px 24px", overflowY: "auto" }}>{children}</div>
+        <div style={{ padding: fullScreen ? "40px" : "20px 24px", overflowY: "auto", flex: 1, background: fullScreen ? "var(--slate-50)" : "white" }}>{children}</div>
       </div>
     </div>
   );
@@ -201,7 +201,7 @@ export function Confirm({ message, onConfirm, onCancel }) {
   return (
     <Modal title="Confirmer la suppression" onClose={onCancel} width={400}>
       <p style={{ fontSize: 14, color: "var(--slate-600)", marginBottom: 24, lineHeight: 1.6 }}>{message}</p>
-      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+      <div className="form-actions">
         <Btn variant="secondary" onClick={onCancel}>Annuler</Btn>
         <Btn variant="danger" onClick={onConfirm}>Supprimer</Btn>
       </div>

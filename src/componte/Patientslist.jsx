@@ -144,8 +144,10 @@ export default function PatientsList({ patients, seances, onSelectPatient, toast
       )}
 
       {showAdd && (
-        <Modal title={editP ? "Modifier le patient" : "Nouveau patient"} onClose={() => { setShowAdd(false); setEditP(null); }}>
-          <PatientForm initial={editP} onSave={savePatient} onCancel={() => { setShowAdd(false); setEditP(null); }} loading={loading} />
+        <Modal fullScreen title={editP ? "Modifier le patient" : "Nouveau patient"} onClose={() => { setShowAdd(false); setEditP(null); }}>
+          <div style={{ maxWidth: 700, margin: "0 auto", background: "white", padding: 40, borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-sm)", border: "1px solid var(--slate-200)" }}>
+            <PatientForm initial={editP} onSave={savePatient} onCancel={() => { setShowAdd(false); setEditP(null); }} loading={loading} />
+          </div>
         </Modal>
       )}
       {confirmDel && (

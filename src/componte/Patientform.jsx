@@ -41,11 +41,11 @@ export default function PatientForm({ initial, onSave, onCancel, loading }) {
 
   return (
     <form onSubmit={submit} noValidate>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="form-grid">
         <FormRow label="Prénom" required>{field("prenom", "Prénom")}</FormRow>
         <FormRow label="Nom"    required>{field("nom",    "Nom")}</FormRow>
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div className="form-grid">
         <FormRow label="Téléphone">{field("telephone", "0555 12 34 56")}</FormRow>
         <FormRow label="Année de naissance">
           <input 
@@ -69,10 +69,8 @@ export default function PatientForm({ initial, onSave, onCancel, loading }) {
       <FormRow label="Allergies / Médicaments" hint="Pénicilline, Latex, aspirine...">
         <input value={f.allergies} onChange={(e) => set("allergies", e.target.value)} placeholder="Aucune" />
       </FormRow>
-      <FormRow label="Notes cliniques">
-        <textarea value={f.notes} onChange={(e) => set("notes", e.target.value)} rows={3} placeholder="Observations particulières..." style={{ resize: "vertical" }} />
-      </FormRow>
-      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 8, borderTop: "1px solid var(--slate-100)", marginTop: 8 }}>
+
+      <div className="form-actions">
         <Btn variant="secondary" onClick={onCancel} type="button">Annuler</Btn>
         <Btn variant="primary" type="submit" disabled={loading}>{loading ? "Enregistrement..." : "Enregistrer le patient"}</Btn>
       </div>

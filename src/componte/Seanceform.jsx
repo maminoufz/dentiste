@@ -110,7 +110,7 @@ export default function SeanceForm({ patientId, initial, onSave, onCancel, loadi
         ))}
         {errors.versements && <div style={{ fontSize: 11, color: "var(--red-500)", marginTop: 4 }}>{errors.versements}</div>}
       </div>
-      <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", paddingTop: 8, borderTop: "1px solid var(--slate-100)", marginTop: 8 }}>
+      <div className="form-actions">
         <Btn variant="secondary" onClick={onCancel} type="button">Annuler</Btn>
         <Btn variant="primary" type="submit" disabled={loading}>{loading ? "Enregistrement..." : "Enregistrer la séance"}</Btn>
       </div>
