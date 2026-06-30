@@ -7,10 +7,18 @@ import Dashboard from "./componte/Dashboard";
 import PatientDetail from "./componte/Patientdetail";
 import PatientsList from "./componte/Patientslist";
 import PatientForm from "./componte/Patientform";
+import Agenda from "./componte/Agenda";
+import Revenus from "./componte/Revenus";
+import Impayes from "./componte/Impayes";
+import Activite from "./componte/Activite";
 
 const NAV = [
   { key: "dashboard", label: "Tableau de bord", icon: "▦" },
+  { key: "agenda",    label: "Agenda",           icon: "📅" },
   { key: "patients",  label: "Patients",         icon: "👥" },
+  { key: "revenus",   label: "Revenus",          icon: "💰" },
+  { key: "impayes",   label: "Paiements en attente", icon: "⏳" },
+  { key: "activite",  label: "Activité récente", icon: "📈" },
 ];
 
 export default function App() {
@@ -150,6 +158,18 @@ export default function App() {
         </button>
         {page === "dashboard" && (
           <Dashboard patients={patients} seances={seances} onSelectPatient={selectPatient} />
+        )}
+        {page === "agenda" && (
+          <Agenda patients={patients} onSelectPatient={selectPatient} />
+        )}
+        {page === "revenus" && (
+          <Revenus seances={seances} />
+        )}
+        {page === "impayes" && (
+          <Impayes patients={patients} seances={seances} onSelectPatient={selectPatient} />
+        )}
+        {page === "activite" && (
+          <Activite patients={patients} seances={seances} onSelectPatient={selectPatient} />
         )}
         {page === "patients" && !selected && (
           <PatientsList patients={patients} seances={seances} onSelectPatient={selectPatient} toast={showToast} />

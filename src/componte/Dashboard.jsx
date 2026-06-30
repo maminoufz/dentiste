@@ -1,7 +1,9 @@
 // src/pages/Dashboard.jsx
 
 import { Card, StatCard, Avatar, TypeBadge } from "./Ui";
-import { formatDA, formatDate, currentMonth, formatDateTime, isFutureDate } from "../Utils";
+import { formatDA, formatDate, currentMonth } from "../Utils";
+
+const MONTH_NAMES = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
 
 export default function Dashboard({ patients, seances, onSelectPatient }) {
   const thisMonth  = currentMonth();
@@ -11,18 +13,11 @@ export default function Dashboard({ patients, seances, onSelectPatient }) {
   };
   const getImpaye = (s) => Math.max(0, Number(s.prix || 0) - getVersement(s));
 
-  const totalPaye  = seances.reduce((n, s) => n + getVersement(s), 0);
   const totalImpaye = seances.reduce((n, s) => n + getImpaye(s), 0);
   const seancesMois = seances.filter((s) => s.date?.startsWith(thisMonth));
   const revenuMois  = seancesMois.reduce((n, s) => n + getVersement(s), 0);
 
   const recent = [...seances].sort((a, b) => (b.date || "").localeCompare(a.date || "")).slice(0, 7);
-
-  // Bar chart data: séances par type
-  const byType = {};
-  seances.forEach((s) => { byType[s.type] = (byType[s.type] || 0) + 1; });
-  const topTypes = Object.entries(byType).sort((a, b) => b[1] - a[1]).slice(0, 6);
-  const maxCount = topTypes[0]?.[1] || 1;
 
   // Patients with unpaid bills
   const impayes = patients
@@ -35,11 +30,20 @@ export default function Dashboard({ patients, seances, onSelectPatient }) {
     .slice(0, 5);
 
   const today = new Date().toLocaleDateString("fr-DZ", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const currentYear = new Date().getFullYear();
 
-  const upcomingAppointments = patients
-    .filter(p => isFutureDate(p.prochainRdv))
-    .sort((a, b) => new Date(a.prochainRdv) - new Date(b.prochainRdv))
-    .slice(0, 5);
+  // Calculate monthly revenue
+  const monthlyRevenue = Array(12).fill(0);
+  let revenuAnnuel = 0;
+  seances.forEach((s) => {
+    if (!s.date) return;
+    const [y, m] = s.date.split("-");
+    if (parseInt(y, 10) === currentYear) {
+      const amount = getVersement(s);
+      monthlyRevenue[parseInt(m, 10) - 1] += amount;
+      revenuAnnuel += amount;
+    }
+  });
 
   return (
     <div className="fade-in">
@@ -52,77 +56,37 @@ export default function Dashboard({ patients, seances, onSelectPatient }) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 24 }}>
         <StatCard icon="👥" label="Patients total"   value={patients.length}       accent="teal" />
         <StatCard icon="🗓" label="Séances ce mois"  value={seancesMois.length}    sub={`${formatDA(revenuMois)} encaissés`} accent="blue" />
-        <StatCard icon="💰" label="Revenu total"     value={formatDA(totalPaye)}   accent="teal" />
+        <StatCard icon="💰" label={`Revenus ${currentYear}`} value={formatDA(revenuAnnuel)} accent="teal" />
         <StatCard icon="⏳" label="Impayés"          value={formatDA(totalImpaye)} sub={`${impayes.length} patient(s)`} accent={totalImpaye > 0 ? "red" : "teal"} />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {/* Prochains RDV */}
-          <Card style={{ padding: 20, borderLeft: "3px solid #3b82f6" }}>
-            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>🗓 Prochains rendez-vous</h3>
-            {upcomingAppointments.length === 0
-              ? <p style={{ fontSize: 13, color: "var(--slate-400)", textAlign: "center", padding: "10px 0" }}>Aucun rendez-vous à venir</p>
-              : upcomingAppointments.map((p, i) => (
-                  <div key={p.id} onClick={() => onSelectPatient(p)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderBottom: i < upcomingAppointments.length - 1 ? "1px solid var(--slate-100)" : "none", cursor: "pointer" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                      <Avatar prenom={p.prenom} nom={p.nom} size={30} />
-                      <span style={{ fontSize: 13, fontWeight: 500 }}>{p.prenom} {p.nom}</span>
-                    </div>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: "#1d4ed8", background: "#eff6ff", padding: "4px 8px", borderRadius: "var(--radius-sm)" }}>
-                      {formatDateTime(p.prochainRdv)}
+          {/* Revenus par mois */}
+          <Card style={{ padding: 20, borderLeft: "3px solid var(--teal-500)" }}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>📊 Revenus par mois ({currentYear})</h3>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {MONTH_NAMES.map((month, i) => {
+                const amount = monthlyRevenue[i];
+                // Hide future months that have 0 revenue to keep it clean
+                if (amount === 0 && i > new Date().getMonth()) return null;
+                const isCurrent = i === new Date().getMonth();
+                return (
+                  <div key={month} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: isCurrent ? "var(--teal-50)" : "transparent", borderRadius: "var(--radius-sm)" }}>
+                    <span style={{ fontSize: 14, fontWeight: isCurrent ? 600 : 500, color: isCurrent ? "var(--teal-800)" : "var(--slate-600)" }}>
+                      {month}
+                    </span>
+                    <span style={{ fontSize: 14, fontWeight: amount > 0 ? 700 : 500, color: amount > 0 ? "var(--teal-600)" : "var(--slate-400)" }}>
+                      {amount > 0 ? formatDA(amount) : "0 DA"}
                     </span>
                   </div>
-                ))
-            }
-          </Card>
-
-          {/* Activité récente */}
-          <Card style={{ padding: 20 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Activité récente</h3>
-          {recent.length === 0
-            ? <p style={{ fontSize: 13, color: "var(--slate-400)", textAlign: "center", padding: "20px 0" }}>Aucune séance</p>
-            : recent.map((s, i) => {
-                const p = patients.find((x) => x.id === s.patientId);
-                if (!p) return null;
-                return (
-                  <div key={s.id} onClick={() => onSelectPatient(p)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0", borderBottom: i < recent.length - 1 ? "1px solid var(--slate-100)" : "none", cursor: "pointer" }}>
-                    <Avatar prenom={p.prenom} nom={p.nom} size={34} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.prenom} {p.nom}</div>
-                      <div style={{ fontSize: 11, color: "var(--slate-400)" }}>{formatDate(s.date)}</div>
-                    </div>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
-                      <TypeBadge type={s.type} small />
-                      {s.prix && <span style={{ fontSize: 11, fontWeight: 600, color: "var(--slate-600)" }}>{formatDA(s.prix)}</span>}
-                    </div>
-                  </div>
                 );
-              })
-          }
-        </Card>
+              })}
+            </div>
+          </Card>
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-          {/* Actes fréquents */}
-          <Card style={{ padding: 20 }}>
-            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Actes les plus fréquents</h3>
-            {topTypes.length === 0
-              ? <p style={{ fontSize: 13, color: "var(--slate-400)" }}>—</p>
-              : topTypes.map(([type, count]) => (
-                  <div key={type} style={{ marginBottom: 12 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
-                      <span style={{ fontSize: 13, fontWeight: 500 }}>{type}</span>
-                      <span style={{ fontSize: 12, color: "var(--slate-400)" }}>{count}</span>
-                    </div>
-                    <div style={{ height: 6, background: "var(--slate-100)", borderRadius: "var(--radius-full)", overflow: "hidden" }}>
-                      <div style={{ height: "100%", width: `${(count / maxCount) * 100}%`, background: "var(--teal-500)", borderRadius: "var(--radius-full)", transition: "width 0.6s ease" }} />
-                    </div>
-                  </div>
-                ))
-            }
-          </Card>
-
           {/* Impayés */}
           {impayes.length > 0 && (
             <Card style={{ padding: 20, borderLeft: "3px solid var(--red-400)" }}>
@@ -138,6 +102,31 @@ export default function Dashboard({ patients, seances, onSelectPatient }) {
               ))}
             </Card>
           )}
+
+          {/* Activité récente */}
+          <Card style={{ padding: 20 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Activité récente</h3>
+            {recent.length === 0
+              ? <p style={{ fontSize: 13, color: "var(--slate-400)", textAlign: "center", padding: "20px 0" }}>Aucune séance</p>
+              : recent.map((s, i) => {
+                  const p = patients.find((x) => x.id === s.patientId);
+                  if (!p) return null;
+                  return (
+                    <div key={s.id} onClick={() => onSelectPatient(p)} style={{ display: "flex", alignItems: "center", gap: 12, padding: "8px 0", borderBottom: i < recent.length - 1 ? "1px solid var(--slate-100)" : "none", cursor: "pointer" }}>
+                      <Avatar prenom={p.prenom} nom={p.nom} size={34} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.prenom} {p.nom}</div>
+                        <div style={{ fontSize: 11, color: "var(--slate-400)" }}>{formatDate(s.date)}</div>
+                      </div>
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 }}>
+                        <TypeBadge type={s.type} small />
+                        {s.prix && <span style={{ fontSize: 11, fontWeight: 600, color: "var(--slate-600)" }}>{formatDA(s.prix)}</span>}
+                      </div>
+                    </div>
+                  );
+                })
+            }
+          </Card>
         </div>
       </div>
     </div>
