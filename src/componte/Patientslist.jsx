@@ -2,7 +2,7 @@
 import  { useState } from "react";
 import { Avatar, TypeBadge, Card, Btn, Modal, Confirm, EmptyState, SearchInput } from "./Ui";
 import PatientForm from "./Patientform";
-import { formatDate, formatDA, calcAge } from "../Utils";
+import { formatDate, formatDA, calcAge, formatDateTime, isFutureDate } from "../Utils";
 import { addPatient, updatePatient, deletePatient } from "../firebase/config";
 
 function PatientCard({ patient, seances, onClick, onEdit, onDelete }) {
@@ -50,6 +50,11 @@ function PatientCard({ patient, seances, onClick, onEdit, onDelete }) {
           {patient.allergies && (
             <span style={{ fontSize: 11, background: "var(--amber-50)", color: "var(--amber-700)", padding: "3px 10px", borderRadius: "var(--radius-full)", fontWeight: 500 }}>
               ⚠️ Allergie
+            </span>
+          )}
+          {isFutureDate(patient.prochainRdv) && (
+            <span style={{ fontSize: 11, background: "#eff6ff", color: "#1d4ed8", padding: "3px 10px", borderRadius: "var(--radius-full)", fontWeight: 500 }}>
+              ⏰ RDV: {formatDateTime(patient.prochainRdv)}
             </span>
           )}
           {impaye > 0 && (
@@ -113,6 +118,23 @@ export default function PatientsList({ patients, seances, onSelectPatient, toast
     }
   }
 
+  if (showAdd) {
+    return (
+      <div className="fade-in" style={{ paddingBottom: 40, display: "flex", flexDirection: "column", minHeight: "100%" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 24 }}>
+          <button onClick={() => { setShowAdd(false); setEditP(null); }} style={{ background: "white", border: "1px solid var(--slate-200)", width: 40, height: 40, borderRadius: "var(--radius-md)", fontSize: 18, cursor: "pointer", color: "var(--slate-600)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--shadow-sm)" }}>←</button>
+          <div>
+            <h2 style={{ fontSize: 24, fontWeight: 700 }}>{editP ? "Modifier le patient" : "Nouveau patient"}</h2>
+            <p style={{ fontSize: 14, color: "var(--slate-500)", marginTop: 4 }}>Renseignez les informations du patient</p>
+          </div>
+        </div>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "white", borderRadius: "var(--radius-xl)", overflow: "hidden" }}>
+          <PatientForm initial={editP} onSave={savePatient} onCancel={() => { setShowAdd(false); setEditP(null); }} loading={loading} />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fade-in">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: "wrap", gap: 12 }}>
@@ -141,14 +163,6 @@ export default function PatientsList({ patients, seances, onSelectPatient, toast
             </div>
           ))}
         </div>
-      )}
-
-      {showAdd && (
-        <Modal fullScreen title={editP ? "Modifier le patient" : "Nouveau patient"} onClose={() => { setShowAdd(false); setEditP(null); }}>
-          <div style={{ maxWidth: 700, margin: "0 auto", background: "white", padding: 40, borderRadius: "var(--radius-xl)", boxShadow: "var(--shadow-sm)", border: "1px solid var(--slate-200)" }}>
-            <PatientForm initial={editP} onSave={savePatient} onCancel={() => { setShowAdd(false); setEditP(null); }} loading={loading} />
-          </div>
-        </Modal>
       )}
       {confirmDel && (
         <Confirm message={`Supprimer "${confirmDel.prenom} ${confirmDel.nom}" ? Ses séances ne seront pas supprimées.`}

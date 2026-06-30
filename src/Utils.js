@@ -81,6 +81,32 @@ export function formatDate(d) {
   }
 }
 
+export function formatDateTime(d) {
+  if (!d) return "—";
+  try {
+    const date = d?.toDate ? d.toDate() : new Date(d);
+    return date.toLocaleDateString("fr-DZ", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return d;
+  }
+}
+
+export function isFutureDate(d) {
+  if (!d) return false;
+  try {
+    const date = d?.toDate ? d.toDate() : new Date(d);
+    return date.getTime() > Date.now();
+  } catch {
+    return false;
+  }
+}
+
 export function calcAge(dob) {
   if (!dob) return null;
   if (String(dob).length === 4 && !isNaN(Number(dob))) {

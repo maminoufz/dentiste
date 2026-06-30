@@ -2,8 +2,8 @@
 import  { useState } from "react";
 import { Avatar, TypeBadge, StatutBadge, Card, Btn, Modal, Confirm, EmptyState, StatCard } from "./Ui";
 import SeanceForm from "./Seanceform";
-import { formatDA, formatDate, calcAge, TYPE_ICON } from "../Utils";
-import { addSeance, updateSeance, deleteSeance } from "../firebase/config";
+import { formatDA, formatDate, calcAge, TYPE_ICON, formatDateTime, isFutureDate } from "../Utils";
+import { addSeance, updateSeance, deleteSeance, updatePatient } from "../firebase/config";
 
 function InfoChip({ label, value, accent }) {
   return (
@@ -35,13 +35,21 @@ export default function PatientDetail({ patient, seances, onBack, onEditPatient,
   async function saveSeance(data) {
     setLoading(true);
     try {
+      const { prochainRdv, ...seanceData } = data;
+      
       if (editSeance) {
-        await updateSeance(editSeance.id, data);
+        await updateSeance(editSeance.id, seanceData);
         toast("Séance modifiée");
       } else {
-        await addSeance(data);
+        await addSeance(seanceData);
         toast("Séance ajoutée");
       }
+
+      // Update the patient's next appointment if it was modified in the form
+      if (prochainRdv !== patient.prochainRdv) {
+        await updatePatient(patient.id, { prochainRdv: prochainRdv || "" });
+      }
+
       setShowForm(false);
       setEditSeance(null);
     } catch (err) {
@@ -90,6 +98,7 @@ export default function PatientDetail({ patient, seances, onBack, onEditPatient,
               {age && <InfoChip label="Âge" value={`${age} ans`} />}
               {patient.dateNaissance && <InfoChip label={String(patient.dateNaissance).length === 4 ? "Né(e) en" : "Né(e) le"} value={formatDate(patient.dateNaissance)} />}
               {patient.allergies && <InfoChip label="Allergies" value={patient.allergies} accent="var(--red-600)" />}
+              {isFutureDate(patient.prochainRdv) && <InfoChip label="Prochain RDV" value={formatDateTime(patient.prochainRdv)} accent="#1d4ed8" />}
             </div>
             {patient.notes && (
               <div style={{ marginTop: 12, padding: "10px 14px", background: "var(--amber-50)", borderRadius: "var(--radius-md)", border: "1px solid var(--amber-100)", fontSize: 13, color: "var(--amber-700)" }}>
@@ -107,6 +116,7 @@ export default function PatientDetail({ patient, seances, onBack, onEditPatient,
         <StatCard icon="✅" label="Montant payé"       value={formatDA(totalPaye)}   accent="teal" />
         <StatCard icon="⏳" label="Reste à payer"      value={formatDA(totalImpaye)} accent={totalImpaye > 0 ? "red" : "teal"} />
         {pSeances[0] && <StatCard icon="📅" label="Dernière visite" value={formatDate(pSeances[0].date)} accent="blue" />}
+        <StatCard icon="⏰" label="Prochain RDV" value={isFutureDate(patient.prochainRdv) ? formatDateTime(patient.prochainRdv) : "Aucun"} accent={isFutureDate(patient.prochainRdv) ? "blue" : "teal"} />
       </div>
 
       {/* Header séances */}
@@ -171,7 +181,7 @@ export default function PatientDetail({ patient, seances, onBack, onEditPatient,
 
       {showForm && (
         <Modal title={editSeance ? "Modifier la séance" : "Nouvelle séance"} onClose={() => { setShowForm(false); setEditSeance(null); }}>
-          <SeanceForm patientId={patient.id} initial={editSeance} onSave={saveSeance} onCancel={() => { setShowForm(false); setEditSeance(null); }} loading={loading} />
+          <SeanceForm patientId={patient.id} initial={editSeance} patientProchainRdv={patient.prochainRdv} onSave={saveSeance} onCancel={() => { setShowForm(false); setEditSeance(null); }} loading={loading} />
         </Modal>
       )}
       {confirmDel && (

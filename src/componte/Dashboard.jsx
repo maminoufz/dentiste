@@ -1,7 +1,7 @@
 // src/pages/Dashboard.jsx
 
 import { Card, StatCard, Avatar, TypeBadge } from "./Ui";
-import { formatDA, formatDate, currentMonth } from "../Utils";
+import { formatDA, formatDate, currentMonth, formatDateTime, isFutureDate } from "../Utils";
 
 export default function Dashboard({ patients, seances, onSelectPatient }) {
   const thisMonth  = currentMonth();
@@ -36,6 +36,11 @@ export default function Dashboard({ patients, seances, onSelectPatient }) {
 
   const today = new Date().toLocaleDateString("fr-DZ", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
+  const upcomingAppointments = patients
+    .filter(p => isFutureDate(p.prochainRdv))
+    .sort((a, b) => new Date(a.prochainRdv) - new Date(b.prochainRdv))
+    .slice(0, 5);
+
   return (
     <div className="fade-in">
       <div style={{ marginBottom: 24 }}>
@@ -52,9 +57,29 @@ export default function Dashboard({ patients, seances, onSelectPatient }) {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-        {/* Activité récente */}
-        <Card style={{ padding: 20 }}>
-          <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Activité récente</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          {/* Prochains RDV */}
+          <Card style={{ padding: 20, borderLeft: "3px solid #3b82f6" }}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>🗓 Prochains rendez-vous</h3>
+            {upcomingAppointments.length === 0
+              ? <p style={{ fontSize: 13, color: "var(--slate-400)", textAlign: "center", padding: "10px 0" }}>Aucun rendez-vous à venir</p>
+              : upcomingAppointments.map((p, i) => (
+                  <div key={p.id} onClick={() => onSelectPatient(p)} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 0", borderBottom: i < upcomingAppointments.length - 1 ? "1px solid var(--slate-100)" : "none", cursor: "pointer" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      <Avatar prenom={p.prenom} nom={p.nom} size={30} />
+                      <span style={{ fontSize: 13, fontWeight: 500 }}>{p.prenom} {p.nom}</span>
+                    </div>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: "#1d4ed8", background: "#eff6ff", padding: "4px 8px", borderRadius: "var(--radius-sm)" }}>
+                      {formatDateTime(p.prochainRdv)}
+                    </span>
+                  </div>
+                ))
+            }
+          </Card>
+
+          {/* Activité récente */}
+          <Card style={{ padding: 20 }}>
+            <h3 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>Activité récente</h3>
           {recent.length === 0
             ? <p style={{ fontSize: 13, color: "var(--slate-400)", textAlign: "center", padding: "20px 0" }}>Aucune séance</p>
             : recent.map((s, i) => {
@@ -76,6 +101,7 @@ export default function Dashboard({ patients, seances, onSelectPatient }) {
               })
           }
         </Card>
+        </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {/* Actes fréquents */}

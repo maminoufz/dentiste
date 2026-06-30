@@ -3,11 +3,11 @@ import  { useState } from "react";
 import { FormRow, Btn } from "./Ui";
 import { TYPES_SEANCE, todayISO } from "../Utils";
 
-const EMPTY = { date: todayISO(), type: "Consultation", dent: "", notes: "", prix: "", versements: [], statut: "impayé" };
+const EMPTY = { date: todayISO(), type: "Consultation", dent: "", notes: "", prix: "", versements: [], statut: "impayé", prochainRdv: "" };
 
-export default function SeanceForm({ patientId, initial, onSave, onCancel, loading }) {
+export default function SeanceForm({ patientId, initial, patientProchainRdv, onSave, onCancel, loading }) {
   const [f, setF] = useState(() => {
-    const base = initial ? { ...EMPTY, ...initial } : { ...EMPTY, patientId };
+    const base = initial ? { ...EMPTY, ...initial } : { ...EMPTY, patientId, prochainRdv: patientProchainRdv || "" };
     if (!base.versements) base.versements = [];
     if (base.versement && base.versements.length === 0) {
       base.versements = [{ date: base.date || todayISO(), montant: base.versement, note: "" }];
@@ -110,7 +110,14 @@ export default function SeanceForm({ patientId, initial, onSave, onCancel, loadi
         ))}
         {errors.versements && <div style={{ fontSize: 11, color: "var(--red-500)", marginTop: 4 }}>{errors.versements}</div>}
       </div>
-      <div className="form-actions">
+
+      <div style={{ marginTop: 16 }}>
+        <FormRow label="Prochain rendez-vous (Optionnel)">
+          <input type="datetime-local" value={f.prochainRdv || ""} onChange={(e) => set("prochainRdv", e.target.value)} />
+        </FormRow>
+      </div>
+
+      <div className="form-actions" style={{ marginTop: 24 }}>
         <Btn variant="secondary" onClick={onCancel} type="button">Annuler</Btn>
         <Btn variant="primary" type="submit" disabled={loading}>{loading ? "Enregistrement..." : "Enregistrer la séance"}</Btn>
       </div>

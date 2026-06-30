@@ -1,0 +1,253 @@
+/* src/components/PatientForm.css */
+
+.pf-shell {
+  /* Local design tokens — adjust to match your app's palette */
+  --pf-bg: #f8fafc;
+  --pf-card: #ffffff;
+  --pf-border: #cbd5e1;
+  --pf-border-focus: #0d9488;
+  --pf-ring: rgba(13, 148, 136, 0.25);
+  --pf-text: #0f172a;
+  --pf-text-muted: #64748b;
+  --pf-label: #334155;
+  --pf-primary: #0d9488;
+  --pf-primary-hover: #0f766e;
+  --pf-error: #ef4444;
+  --pf-error-bg: rgba(239, 68, 68, 0.08);
+  --pf-radius: 10px;
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  max-height: 100dvh; /* dynamic viewport height: correct on mobile browsers */
+  background: var(--pf-card);
+  box-sizing: border-box;
+}
+
+.pf-shell * {
+  box-sizing: border-box;
+}
+
+/* ---------- Header ---------- */
+
+.pf-header {
+  flex-shrink: 0;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e2e8f0;
+  background: var(--pf-card);
+}
+
+.pf-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--pf-text);
+}
+
+.pf-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--pf-text-muted);
+}
+
+/* ---------- Scrollable body — THE FIX ----------
+   flex: 1 1 auto lets this area grow/shrink to fill remaining space,
+   min-height: 0 stops it from refusing to shrink below its content
+   (the default flex behavior, and the actual reason the last input
+   was getting clipped), and overflow-y: auto makes it scroll on its
+   own instead of pushing the footer off-screen. */
+
+.pf-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px;
+  background: var(--pf-bg);
+}
+
+.pf-spacer {
+  height: 4px;
+}
+
+/* ---------- Layout grid ---------- */
+
+.pf-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.pf-field {
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-field + .pf-field {
+  margin-top: 18px;
+}
+
+/* ---------- Labels / hints / errors ---------- */
+
+.pf-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--pf-label);
+  margin-bottom: 6px;
+}
+
+.pf-required {
+  color: var(--pf-error);
+}
+
+.pf-hint {
+  font-size: 12px;
+  color: var(--pf-text-muted);
+  margin-top: 6px;
+}
+
+.pf-error {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--pf-error);
+  margin-top: 5px;
+}
+
+/* ---------- Inputs ---------- */
+
+.pf-input,
+.pf-select,
+.pf-textarea {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  color: var(--pf-text);
+  background: var(--pf-card);
+  border: 1px solid var(--pf-border);
+  border-radius: var(--pf-radius);
+  padding: 10px 12px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.pf-input::placeholder,
+.pf-textarea::placeholder {
+  color: #94a3b8;
+}
+
+.pf-input:focus,
+.pf-select:focus,
+.pf-textarea:focus {
+  border-color: var(--pf-border-focus);
+  box-shadow: 0 0 0 3px var(--pf-ring);
+}
+
+.pf-input-error {
+  border-color: var(--pf-error);
+  background: var(--pf-error-bg);
+}
+
+.pf-input-error:focus {
+  border-color: var(--pf-error);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+}
+
+.pf-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'><polyline points='6 9 12 15 18 9'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px;
+  padding-right: 34px;
+}
+
+.pf-textarea {
+  resize: none;
+}
+
+/* ---------- Footer — sticky / always reachable ---------- */
+
+.pf-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 10px;
+  padding: 16px 20px;
+  /* iOS safe-area so the footer clears the home indicator */
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  border-top: 1px solid #e2e8f0;
+  background: var(--pf-card);
+}
+
+.pf-btn {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 11px 16px;
+  border-radius: var(--pf-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.05s ease, opacity 0.15s ease;
+}
+
+.pf-btn:active {
+  transform: scale(0.98);
+}
+
+.pf-btn-secondary {
+  background: var(--pf-card);
+  border-color: var(--pf-border);
+  color: var(--pf-label);
+}
+
+.pf-btn-secondary:hover {
+  background: #f1f5f9;
+}
+
+.pf-btn-primary {
+  background: var(--pf-primary);
+  color: #ffffff;
+}
+
+.pf-btn-primary:hover {
+  background: var(--pf-primary-hover);
+}
+
+.pf-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---------- Tablet / desktop ---------- */
+
+@media (min-width: 640px) {
+  .pf-shell {
+    /* No card styling, integrates as a page */
+  }
+
+  .pf-grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pf-grid-half {
+    grid-template-columns: 1fr;
+    max-width: calc(50% - 7px);
+  }
+
+  .pf-field + .pf-field {
+    margin-top: 0;
+  }
+
+  .pf-footer {
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .pf-btn {
+    width: auto;
+  }
+}
